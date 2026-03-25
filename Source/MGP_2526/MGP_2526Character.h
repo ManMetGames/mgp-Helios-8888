@@ -49,6 +49,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	/** Dash Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
 public:
 
 	/** Constructor */
@@ -66,6 +70,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
+	void StartDash(const FInputActionValue& Value);
+	void EndDash(const FInputActionValue& Value);
 
 public:
 
@@ -76,6 +83,12 @@ public:
 	/** Handles look inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoLook(float Yaw, float Pitch);
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoStartDash();
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoEndDash();
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")

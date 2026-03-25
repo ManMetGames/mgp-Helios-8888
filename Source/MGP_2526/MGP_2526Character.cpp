@@ -65,6 +65,10 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMGP_2526Character::Look);
+
+		// Dashing
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartDash);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndDash);
 	}
 	else
 	{
@@ -88,6 +92,17 @@ void AMGP_2526Character::Look(const FInputActionValue& Value)
 
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void AMGP_2526Character::StartDash(const FInputActionValue& Value)
+{
+	// route the input
+	DoStartDash();
+}
+
+void AMGP_2526Character::EndDash(const FInputActionValue& Value)
+{
+	DoEndDash();
 }
 
 void AMGP_2526Character::DoMove(float Right, float Forward)
@@ -130,4 +145,15 @@ void AMGP_2526Character::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AMGP_2526Character::DoStartDash(){
+	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+	//Get player's facing direction
+	//Add force
+
+}
+
+void AMGP_2526Character::DoEndDash() {
+	UE_LOG(LogTemp, Warning, TEXT("Dash Ended"));
 }
