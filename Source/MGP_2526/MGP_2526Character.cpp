@@ -29,11 +29,11 @@ AMGP_2526Character::AMGP_2526Character()
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 1000.f;
-	GetCharacterMovement()->AirControl = 1.0f; // 0 is no control. 1 is full control at max speed
+	GetCharacterMovement()->AirControl = 0.85f; // 0 is no control. 1 is full control at max speed
 	GetCharacterMovement()->MaxWalkSpeed = 800.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 3000.f;
-	GetCharacterMovement()->BrakingDecelerationFalling = 3000.0f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -150,13 +150,6 @@ void AMGP_2526Character::DoJumpEnd()
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
 	//Get player's facing direction
-	if (GetController() != nullptr) {
-		// find out which way is forward
-		const FRotator Rotation = GetController()->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-
-	}
 	//Add force
 
 }
