@@ -68,7 +68,6 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Dashing
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartDash);
-		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndDash);
 	}
 	else
 	{
@@ -100,10 +99,6 @@ void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 	DoStartDash();
 }
 
-void AMGP_2526Character::EndDash(const FInputActionValue& Value)
-{
-	DoEndDash();
-}
 
 void AMGP_2526Character::DoMove(float Right, float Forward)
 {
@@ -149,11 +144,10 @@ void AMGP_2526Character::DoJumpEnd()
 
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+	const FVector forwardsDirection = this->GetActorRotation().Vector();
+	LaunchCharacter(DashStrength * forwardsDirection, true, true);
 	//Get player's facing direction
 	//Add force
 
 }
 
-void AMGP_2526Character::DoEndDash() {
-	UE_LOG(LogTemp, Warning, TEXT("Dash Ended"));
-}

@@ -30,6 +30,8 @@ class AMGP_2526Character : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	
 	
 protected:
 
@@ -53,6 +55,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;
 
+	/** How far the dash should go */
+	float DashStrength =  3000;
+
 public:
 
 	/** Constructor */
@@ -72,7 +77,6 @@ protected:
 	void Look(const FInputActionValue& Value);
 	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
 	void StartDash(const FInputActionValue& Value);
-	void EndDash(const FInputActionValue& Value);
 
 public:
 
@@ -87,8 +91,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoStartDash();
 
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoEndDash();
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
