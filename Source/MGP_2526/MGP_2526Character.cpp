@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+
 #include "MGP_2526.h"
 
 AMGP_2526Character::AMGP_2526Character()
@@ -41,6 +42,7 @@ AMGP_2526Character::AMGP_2526Character()
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -68,6 +70,11 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Dashing
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartDash);
+
+		// Shooting
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMGP_2526Character::ShootBall);
+
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMGP_2526Character::ShootBallEnd);
 	}
 	else
 	{
@@ -97,6 +104,18 @@ void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 {
 	// route the input
 	DoStartDash();
+}
+
+void AMGP_2526Character::ShootBall(const FInputActionValue& Value)
+{
+	// route the input
+	DoShootBallStart();
+}
+
+void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
+{
+	// route the input
+	DoShootBallEnd();
 }
 
 
@@ -142,6 +161,16 @@ void AMGP_2526Character::DoJumpEnd()
 	StopJumping();
 }
 
+void AMGP_2526Character::DoShootBallStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Shoot"));
+	// SpawnActor
+}
+
+void AMGP_2526Character::DoShootBallEnd()
+{
+	//
+}
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
 	const FVector forwardsDirection = this->GetActorRotation().Vector();
