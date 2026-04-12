@@ -15,7 +15,7 @@ ABallProj::ABallProj()
 void ABallProj::BeginPlay()
 {
 	Super::BeginPlay();
-	
+		
 }
 
 // Called every frame
@@ -23,5 +23,9 @@ void ABallProj::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABallProj::OnHit() {
+	// Nothing
 }
 

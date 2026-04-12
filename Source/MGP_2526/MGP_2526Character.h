@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 
+#include "BallProj.h"
 #include "MGP_2526Character.generated.h"
 
 class USpringArmComponent;
@@ -64,8 +65,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ShootAction;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	//ABallProjectile* BallProjectile = NULL;
+	
 public:
 
 	/** Constructor */
@@ -88,6 +88,7 @@ protected:
 
 	void ShootBall(const FInputActionValue& Value);
 	void ShootBallEnd(const FInputActionValue& Value);
+
 
 public:
 
@@ -118,6 +119,7 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoShootBallEnd();
+
 
 public:
 

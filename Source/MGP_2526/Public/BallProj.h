@@ -6,14 +6,28 @@
 #include "GameFramework/Actor.h"
 #include "BallProj.generated.h"
 
-UCLASS()
+class USphereComponent;
+class UProjectileMovementComponent;
+
+UCLASS(config = Game)
 class MGP_2526_API ABallProj : public AActor
 {
 	GENERATED_BODY()
 	
+	// ** Collision Component *//
+	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
+	USphereComponent* CollisionComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UProjectileMovementComponent* ProjectileMovement;
 public:	
 	// Sets default values for this actor's properties
 	ABallProj();
+
+	UFUNCTION() void OnHit();
+	USphereComponent* GetCollisionComp() const { return CollisionComp; };
+	UProjectileMovementComponent* GetProj() const { return ProjectileMovement; };
+	
 
 protected:
 	// Called when the game starts or when spawned
