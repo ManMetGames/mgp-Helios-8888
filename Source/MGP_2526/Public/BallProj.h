@@ -24,7 +24,7 @@ public:
 	// Sets default values for this actor's properties
 	ABallProj();
 
-	UFUNCTION() void OnHit();
+	UFUNCTION() void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector Impulse, const FHitResult& hit);
 	USphereComponent* GetCollisionComp() const { return CollisionComp; };
 	UProjectileMovementComponent* GetProj() const { return ProjectileMovement; };
 	
