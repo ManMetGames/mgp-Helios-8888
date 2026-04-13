@@ -7,13 +7,13 @@
 #include "BallProjectile.generated.h"
 
 UCLASS()
-class MGP_2526_API ABallProjectile : public AActor
+class MGP_2526_API ANoldClass : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ABallProjectile();
+	ANoldClass();
 
 protected:
 	// Called when the game starts or when spawned

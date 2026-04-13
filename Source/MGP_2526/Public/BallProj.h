@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,10 +23,11 @@ class MGP_2526_API ABallProj : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ABallProj();
-
+	
 	UFUNCTION() void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector Impulse, const FHitResult& hit);
 	USphereComponent* GetCollisionComp() const { return CollisionComp; };
 	UProjectileMovementComponent* GetProj() const { return ProjectileMovement; };
+	virtual void SpawnBall();
 	
 
 protected:

@@ -13,7 +13,7 @@ ABallProj::ABallProj()
 
 	//Collision
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SPHERE"));
-	CollisionComp->InitSphereRadius(5.0f);
+	CollisionComp->InitSphereRadius(50.0f);
 	CollisionComp->BodyInstance.SetCollisionProfileName("Projectile");
 	CollisionComp->OnComponentHit.AddDynamic(this, &ABallProj::OnHit);
 
@@ -22,8 +22,8 @@ ABallProj::ABallProj()
 	//Projectile Movement
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
 	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 3000.0f;
-	ProjectileMovement->MaxSpeed = 3500.0f;
+	ProjectileMovement->InitialSpeed = 5000.0f;
+	ProjectileMovement->MaxSpeed = 6000.0f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	ProjectileMovement->bShouldBounce = true;
 
@@ -35,7 +35,7 @@ ABallProj::ABallProj()
 void ABallProj::BeginPlay()
 {
 	Super::BeginPlay();
-		
+	SpawnBall();
 }
 
 // Called every frame
@@ -57,4 +57,9 @@ void ABallProj::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 	}
 	
 }
+
+void ABallProj::SpawnBall() {
+	ProjectileMovement->InitialSpeed = 3000.0f;
+	
+}	
 

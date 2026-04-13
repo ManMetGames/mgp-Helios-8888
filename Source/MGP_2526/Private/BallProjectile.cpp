@@ -4,7 +4,7 @@
 #include "BallProjectile.h"
 
 // Sets default values
-ABallProjectile::ABallProjectile()
+ANoldClass::ANoldClass()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,14 +12,14 @@ ABallProjectile::ABallProjectile()
 }
 
 // Called when the game starts or when spawned
-void ABallProjectile::BeginPlay()
+void ANoldClass::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ABallProjectile::Tick(float DeltaTime)
+void ANoldClass::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

@@ -168,17 +168,12 @@ void AMGP_2526Character::DoJumpEnd()
 void AMGP_2526Character::DoShootBallStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Shoot"));
-	// SpawnActor
-	const FRotator SpawnRotation = GetActorRotation();
-	const FVector SpawnLocation = GetActorLocation();
-
-	FActorSpawnParameters ActorSpawnParams;
-	ActorSpawnParams.Name = TEXT("Proj");
-	ActorSpawnParams.Owner = this;
-	ActorSpawnParams.Instigator = this;
-	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	// Why doesn't spawn actor just work
-	//ABallProj* Ball = GetWorld()->SpawnActor<ABallProj>(ProjectileClass, SpawnRotation, SpawnLocation, ActorSpawnParams);
+	FVector SpawnLocation = GetActorForwardVector() * 100 + GetActorLocation();
+	ABallProj* Ball = GetWorld()->SpawnActor<ABallProj>(BP_ProjectileClass, SpawnLocation, GetFollowCamera()->GetComponentRotation());
+	if (Ball) {
+		Ball->SetActorLabel(TEXT("Ball"));	
+		UE_LOG(LogTemp, Warning, TEXT("Ball Spawned"));
+	}
 }
 
 void AMGP_2526Character::DoShootBallEnd()

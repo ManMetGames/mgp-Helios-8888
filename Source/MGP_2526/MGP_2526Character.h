@@ -65,8 +65,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ShootAction;
 
-	UPROPERTY()
-	TSubclassOf<ABallProj> ProjectileClass;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABallProj> BP_ProjectileClass;
+
+	//Health
+	//UPROPERTY()
+	//int  
+
 	
 public:
 
