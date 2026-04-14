@@ -68,9 +68,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABallProj> BP_ProjectileClass;
 
-	//Health
-	//UPROPERTY()
-	//int  
+	//Health goes below
 
 	
 public:
