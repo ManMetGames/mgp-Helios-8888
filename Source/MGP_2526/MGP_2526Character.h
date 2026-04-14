@@ -58,7 +58,7 @@ protected:
 	UInputAction* DashAction;
 
 	/** How far the dash should go */
-	float DashStrength =  3000;
+	float DashStrength =  5000.0f;
 
 
 	/** Shoot Input Action */

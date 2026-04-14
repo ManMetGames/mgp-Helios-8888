@@ -183,8 +183,8 @@ void AMGP_2526Character::DoShootBallEnd()
 
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-	const FVector forwardsDirection = this->GetActorRotation().Vector();
-	LaunchCharacter(DashStrength * forwardsDirection, true, true);
+	LaunchCharacter(DashStrength * GetFollowCamera()->GetComponentRotation().Vector(), true, true);
+	GetCharacterMovement()->MaxWalkSpeed = 3000.f;
 	//Get player's facing direction
 	//Add force
 

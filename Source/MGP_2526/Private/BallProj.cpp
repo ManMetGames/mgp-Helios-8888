@@ -29,6 +29,9 @@ ABallProj::ABallProj()
 
 	InitialLifeSpan = 3.0f;
 
+	BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Ball Mesh"));
+	BallMesh->SetupAttachment(RootComponent);
+
 }
 
 // Called when the game starts or when spawned
