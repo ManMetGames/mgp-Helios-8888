@@ -21,8 +21,6 @@ class MGP_2526_API ABallProj : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjectileMovement;
 	
-	UPROPERTY(VisibleDefaultsOnly, Category = Projectile)
-	UStaticMeshComponent* BallMesh;
 public:	
 	// Sets default values for this actor's properties
 	ABallProj();

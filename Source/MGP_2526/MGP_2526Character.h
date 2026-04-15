@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-
+#include "VHealthComponent.h"
 #include "BallProj.h"
 #include "MGP_2526Character.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class AVHealthComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -69,7 +70,9 @@ protected:
 	TSubclassOf<ABallProj> BP_ProjectileClass;
 
 	//Health goes below
-
+	/** Shoot Input Action */
+	UPROPERTY(EditAnywhere)
+	AVHealthComponent* HealthComponent;
 	
 public:
 
@@ -107,7 +110,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoStartDash();
-
+	UFUNCTION()
+	virtual void DoEndDash();
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")

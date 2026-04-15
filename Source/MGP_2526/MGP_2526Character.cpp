@@ -50,6 +50,8 @@ AMGP_2526Character::AMGP_2526Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	HealthComponent = CreateDefaultSubobject<AVHealthComponent>(TEXT("HealthComponent"));
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -183,10 +185,18 @@ void AMGP_2526Character::DoShootBallEnd()
 
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-	LaunchCharacter(DashStrength * GetFollowCamera()->GetComponentRotation().Vector(), true, true);
-	GetCharacterMovement()->MaxWalkSpeed = 3000.f;
 	//Get player's facing direction
 	//Add force
+	LaunchCharacter(DashStrength * GetFollowCamera()->GetComponentRotation().Vector(), true, true);
+	//Check if the player has moved a certain distance, if so, end the dash
+	HealthComponent->UpdateHealth(-10.f);
+}
 
+void AMGP_2526Character::DoEndDash() {
+	//Get the player's current position and velocity
+	//Set their walk speed to the stored velocity
+	//Set y velocity to 0?
+	GetCharacterMovement()->MaxWalkSpeed = 3000.f;
+	
 }
 
