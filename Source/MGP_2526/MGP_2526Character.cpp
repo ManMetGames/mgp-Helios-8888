@@ -31,9 +31,9 @@ AMGP_2526Character::AMGP_2526Character()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 1000.f;
+	GetCharacterMovement()->JumpZVelocity = 1500.0f;
 	GetCharacterMovement()->AirControl = 0.85f; // 0 is no control. 1 is full control at max speed
-	GetCharacterMovement()->MaxWalkSpeed = 800.f;
+	GetCharacterMovement()->MaxWalkSpeed = 1500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -91,7 +91,6 @@ void AMGP_2526Character::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
 	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
 }
@@ -185,18 +184,29 @@ void AMGP_2526Character::DoShootBallEnd()
 
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(GetVelocity().Size()));
 	//Get player's facing direction
 	//Add force
 	LaunchCharacter(DashStrength * GetFollowCamera()->GetComponentRotation().Vector(), true, true);
 	//Check if the player has moved a certain distance, if so, end the dash
-	HealthComponent->UpdateHealth(-10.f);
+	//HealthComponent->UpdateHealth(-10.f);
+	//DoEndDash();
 }
 
 void AMGP_2526Character::DoEndDash() {
 	//Get the player's current position and velocity
+	FVector CurrentPos = GetActorLocation();
+	FVector CurrentVel = GetVelocity();
+	float currentSpeed = CurrentVel.Size();
+	CurrentVel.Normalize();
 	//Set their walk speed to the stored velocity
+	GetCharacterMovement()->MaxWalkSpeed = currentSpeed;
 	//Set y velocity to 0?
-	GetCharacterMovement()->MaxWalkSpeed = 3000.f;
+	CurrentVel.Z = 0;
+	CurrentVel *= currentSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *CurrentVel.ToString());
+	GetCharacterMovement()->Velocity = CurrentVel;
 	
 }
 
