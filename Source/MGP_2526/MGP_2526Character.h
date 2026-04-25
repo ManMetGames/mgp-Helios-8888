@@ -5,15 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "VHealthComponent.h"
+#include "MyHealthComponent.h"
 #include "BallProj.h"
 #include "MGP_2526Character.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
-class AVHealthComponent;
+class UMyHealthComponent;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -26,6 +27,8 @@ class AMGP_2526Character : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UMyHealthComponent* HealthComponent;
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -34,6 +37,7 @@ class AMGP_2526Character : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+	
 	
 	
 protected:
@@ -69,11 +73,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABallProj> BP_ProjectileClass;
 
-	//Health goes below
-	/** Shoot Input Action */
-	UPROPERTY(EditAnywhere)
-	AVHealthComponent* HealthComponent;
-	
 public:
 
 	/** Constructor */

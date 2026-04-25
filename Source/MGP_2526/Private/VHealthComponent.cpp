@@ -35,11 +35,9 @@ void AVHealthComponent::UpdateHealth(float dHealth) {
 	else if (CurrentHealth < 0) {
 		CurrentHealth = 0;
 
-		OnHealthDepleted.Broadcast();
 
 	}	
 
-	OnTakeDamage.Broadcast(CurrentHealth, MaxHealth);
 
 }
 

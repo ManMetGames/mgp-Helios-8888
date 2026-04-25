@@ -63,6 +63,8 @@ void ABallProj::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 			Destroy();
 		}
 	}
+	// Where did the ball hit?
+	// I need this information if I want to spawn the grappling hook with a projectile instead of a raycast
 	
 }
 

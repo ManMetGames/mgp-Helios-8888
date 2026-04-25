@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
+#include "MyHealthComponent.h"
 #include "BallProj.h"
 
 #include "MGP_2526.h"
@@ -50,7 +51,8 @@ AMGP_2526Character::AMGP_2526Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	HealthComponent = CreateDefaultSubobject<AVHealthComponent>(TEXT("HealthComponent"));
+	// Create health component
+	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -184,17 +186,18 @@ void AMGP_2526Character::DoShootBallEnd()
 
 void AMGP_2526Character::DoStartDash(){
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-
+	//I'm thinking I turn this into a grapple retract. 
+	//It might also be cool if when the grapple hits an enemy, it pulls the enemy towards the player instead of the player towards the enemy.
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(GetVelocity().Size()));
-	//Get player's facing direction
-	//Add force
-	LaunchCharacter(DashStrength * GetFollowCamera()->GetComponentRotation().Vector(), true, true);
-	//Check if the player has moved a certain distance, if so, end the dash
-	//HealthComponent->UpdateHealth(-10.f);
-	//DoEndDash();
+	//Get player's facing direction. later on will be the vector from player to grapple point
+	FVector DashDirection = GetFollowCamera()->GetComponentRotation().Vector();
+	//Apply a force
+	LaunchCharacter(DashStrength * DashDirection, true, true);
 }
 
 void AMGP_2526Character::DoEndDash() {
+	// I want the end of dash to cancel out the player's vertical velocity and set their horizontal velocity to the speed they had at the start of the dash.
+	
 	//Get the player's current position and velocity
 	FVector CurrentPos = GetActorLocation();
 	FVector CurrentVel = GetVelocity();
