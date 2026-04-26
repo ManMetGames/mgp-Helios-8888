@@ -27,7 +27,7 @@ class AMGP_2526Character : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UMyHealthComponent* HealthComponent;
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
@@ -87,7 +87,7 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/

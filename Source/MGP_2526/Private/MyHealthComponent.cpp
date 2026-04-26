@@ -19,9 +19,11 @@ void UMyHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
-	// ...
+	UE_LOG(LogTemp, Warning, TEXT("Health Component Initialized with %f health"), CurrentHealth);
 	
 }
+
+
 
 float UMyHealthComponent::GetHealth() const {
 	return CurrentHealth;
@@ -45,5 +47,5 @@ void UMyHealthComponent::UpdateHealth(float dHealth) {
 	}
 
 	OnTakeDamage.Broadcast(CurrentHealth, MaxHealth);
-
+	//UE_LOG(LogTemp, Warning, TEXT("Health Updated: %f health remaining"), CurrentHealth);
 }

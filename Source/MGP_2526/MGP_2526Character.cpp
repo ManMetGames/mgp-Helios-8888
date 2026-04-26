@@ -18,6 +18,10 @@
 
 AMGP_2526Character::AMGP_2526Character()
 {
+	// Create health component
+	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
+
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -51,8 +55,6 @@ AMGP_2526Character::AMGP_2526Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Create health component
-	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
 	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -88,7 +90,14 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		UE_LOG(LogMGP_2526, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
+void AMGP_2526Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (HealthComponent)
+	{
+		HealthComponent->OnTakeDamage.RemoveAll(this);
+		HealthComponent->OnHealthDepleted.RemoveAll(this);
+	}
+}
 void AMGP_2526Character::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -177,6 +186,8 @@ void AMGP_2526Character::DoShootBallStart()
 		Ball->SetActorLabel(TEXT("Ball"));	
 		UE_LOG(LogTemp, Warning, TEXT("Ball Spawned"));
 	}
+	//HealthComponent->UpdateHealth(-10.f);
+	//UE_LOG(LogTemp, Warning, TEXT("Player has %f health remaining"), HealthComponent->GetHealth());	
 }
 
 void AMGP_2526Character::DoShootBallEnd()

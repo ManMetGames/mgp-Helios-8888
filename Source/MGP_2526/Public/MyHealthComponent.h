@@ -15,21 +15,23 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class MGP_2526_API UMyHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
+	
+public:	
 	//Current health
-	UPROPERTY( BlueprintGetter = GetHealth, EditAnywhere, Category = "Default")
+	UPROPERTY(BlueprintGetter = GetHealth, EditAnywhere, Category = "Default")
 	float CurrentHealth;
 
 	// Max health
 	UPROPERTY(BlueprintGetter = GetMaxHealth, EditAnywhere, Category = "Default	")
 	float MaxHealth = 100.0f;
-public:	
+
 	// Sets default values for this component's properties
 	UMyHealthComponent();
-	UPROPERTY(VisibleDefaultsOnly, BlueprintAssignable, Category = "Default")
+
+	UPROPERTY(BlueprintAssignable)
 	FOnHealthChangedSignature OnTakeDamage;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintAssignable, Category = "Default")
+	UPROPERTY(BlueprintAssignable)
 	FOnHealthDepletedSignature OnHealthDepleted;
 
 protected:
