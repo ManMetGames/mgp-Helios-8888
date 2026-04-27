@@ -19,7 +19,7 @@
 AMGP_2526Character::AMGP_2526Character()
 {
 	// Create health component
-	HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
+	//HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
 
 
 	// Set size for collision capsule
@@ -92,11 +92,7 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 }
 void AMGP_2526Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (HealthComponent)
-	{
-		HealthComponent->OnTakeDamage.RemoveAll(this);
-		HealthComponent->OnHealthDepleted.RemoveAll(this);
-	}
+	Super::EndPlay(EndPlayReason);
 }
 void AMGP_2526Character::Move(const FInputActionValue& Value)
 {
