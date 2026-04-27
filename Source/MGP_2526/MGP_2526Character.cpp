@@ -84,6 +84,11 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMGP_2526Character::ShootBallEnd);
 
+		// Shooting
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartGrapple);
+
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndGrapple);
+
 	}
 	else
 	{
@@ -129,6 +134,17 @@ void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
 	DoShootBallEnd();
 }
 
+void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
+{
+	// route the input
+	DoGrappleStart();
+}
+
+void AMGP_2526Character::EndGrapple(const FInputActionValue& Value)
+{
+	// route the input
+	DoGrappleEnd();
+}
 
 
 void AMGP_2526Character::DoMove(float Right, float Forward)
@@ -220,3 +236,13 @@ void AMGP_2526Character::DoEndDash() {
 	
 }
 
+void AMGP_2526Character::DoGrappleStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
+	
+}
+
+void AMGP_2526Character::DoGrappleEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
+}

@@ -65,6 +65,11 @@ protected:
 	/** How far the dash should go */
 	float DashStrength =  3000.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrappleAction;
+
+	/** How far the dash should go */
+	float GrappleRange = 5000.f;
 
 	/** Shoot Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -92,7 +97,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
 	void StartDash(const FInputActionValue& Value);
-
+	void StartGrapple(const FInputActionValue& Value);
+	void EndGrapple(const FInputActionValue& Value);
 	void ShootBall(const FInputActionValue& Value);
 	void ShootBallEnd(const FInputActionValue& Value);
 
@@ -119,6 +125,15 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+	/** Handles grapple pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleStart();
+
+	/** Handles jump pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleEnd();
+
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category = "Input")
