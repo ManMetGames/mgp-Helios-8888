@@ -10,10 +10,18 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+
+#include "MyHealthComponent.h"
+#include "BallProj.h"
+
 #include "MGP_2526.h"
 
 AMGP_2526Character::AMGP_2526Character()
 {
+	// Create health component
+	//HealthComponent = CreateDefaultSubobject<UMyHealthComponent>(TEXT("HealthComponent"));
+
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
@@ -28,9 +36,9 @@ AMGP_2526Character::AMGP_2526Character()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 500.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->JumpZVelocity = 1500.0f;
+	GetCharacterMovement()->AirControl = 0.85f; // 0 is no control. 1 is full control at max speed
+	GetCharacterMovement()->MaxWalkSpeed = 1500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -41,11 +49,13 @@ AMGP_2526Character::AMGP_2526Character()
 	CameraBoom->TargetArmLength = 400.0f;
 	CameraBoom->bUsePawnControlRotation = true;
 
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -65,18 +75,34 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMGP_2526Character::Look);
+
+		// Dashing
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartDash);
+
+		// Shooting
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMGP_2526Character::ShootBall);
+
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMGP_2526Character::ShootBallEnd);
+
+		// Shooting
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartGrapple);
+
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndGrapple);
+
 	}
 	else
 	{
 		UE_LOG(LogMGP_2526, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
+void AMGP_2526Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
 void AMGP_2526Character::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
-
 	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
 }
@@ -89,6 +115,37 @@ void AMGP_2526Character::Look(const FInputActionValue& Value)
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
+
+void AMGP_2526Character::StartDash(const FInputActionValue& Value)
+{
+	// route the input
+	DoStartDash();
+}
+
+void AMGP_2526Character::ShootBall(const FInputActionValue& Value)
+{
+	// route the input
+	DoShootBallStart();
+}
+
+void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
+{
+	// route the input
+	DoShootBallEnd();
+}
+
+void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
+{
+	// route the input
+	DoGrappleStart();
+}
+
+void AMGP_2526Character::EndGrapple(const FInputActionValue& Value)
+{
+	// route the input
+	DoGrappleEnd();
+}
+
 
 void AMGP_2526Character::DoMove(float Right, float Forward)
 {
@@ -130,4 +187,62 @@ void AMGP_2526Character::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AMGP_2526Character::DoShootBallStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Shoot"));
+	FVector SpawnLocation = GetActorForwardVector() * 100 + GetActorLocation();
+	ABallProj* Ball = GetWorld()->SpawnActor<ABallProj>(BP_ProjectileClass, SpawnLocation, GetFollowCamera()->GetComponentRotation());
+	if (Ball) {
+		Ball->SetActorLabel(TEXT("Ball"));	
+		UE_LOG(LogTemp, Warning, TEXT("Ball Spawned"));
+	}
+	//HealthComponent->UpdateHealth(-10.f);
+	//UE_LOG(LogTemp, Warning, TEXT("Player has %f health remaining"), HealthComponent->GetHealth());	
+}
+
+void AMGP_2526Character::DoShootBallEnd()
+{
+	//
+}
+
+void AMGP_2526Character::DoStartDash(){
+	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+	//I'm thinking I turn this into a grapple retract. 
+	//It might also be cool if when the grapple hits an enemy, it pulls the enemy towards the player instead of the player towards the enemy.
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(GetVelocity().Size()));
+	//Get player's facing direction. later on will be the vector from player to grapple point
+	FVector DashDirection = GetFollowCamera()->GetComponentRotation().Vector();
+	//Apply a force
+	LaunchCharacter(DashStrength * DashDirection, true, true);
+}
+
+void AMGP_2526Character::DoEndDash() {
+	// I want the end of dash to cancel out the player's vertical velocity and set their horizontal velocity to the speed they had at the start of the dash.
+	
+	//Get the player's current position and velocity
+	FVector CurrentPos = GetActorLocation();
+	FVector CurrentVel = GetVelocity();
+	float currentSpeed = CurrentVel.Size();
+	CurrentVel.Normalize();
+	//Set their walk speed to the stored velocity
+	GetCharacterMovement()->MaxWalkSpeed = currentSpeed;
+	//Set y velocity to 0?
+	CurrentVel.Z = 0;
+	CurrentVel *= currentSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *CurrentVel.ToString());
+	GetCharacterMovement()->Velocity = CurrentVel;
+	
+}
+
+void AMGP_2526Character::DoGrappleStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
+	
+}
+
+void AMGP_2526Character::DoGrappleEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
 }

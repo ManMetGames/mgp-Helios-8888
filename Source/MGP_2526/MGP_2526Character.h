@@ -5,12 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "MyHealthComponent.h"
+#include "BallProj.h"
 #include "MGP_2526Character.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class UMyHealthComponent;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -23,6 +27,8 @@ class AMGP_2526Character : public ACharacter
 {
 	GENERATED_BODY()
 
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	//UMyHealthComponent* HealthComponent;
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -30,6 +36,9 @@ class AMGP_2526Character : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	
+	
 	
 protected:
 
@@ -49,6 +58,26 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	/** Dash Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
+	/** How far the dash should go */
+	float DashStrength =  3000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrappleAction;
+
+	/** How far the dash should go */
+	float GrappleRange = 5000.f;
+
+	/** Shoot Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ShootAction;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ABallProj> BP_ProjectileClass;
+
 public:
 
 	/** Constructor */
@@ -63,9 +92,16 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
+	void StartDash(const FInputActionValue& Value);
+	void StartGrapple(const FInputActionValue& Value);
+	void EndGrapple(const FInputActionValue& Value);
+	void ShootBall(const FInputActionValue& Value);
+	void ShootBallEnd(const FInputActionValue& Value);
+
 
 public:
 
@@ -77,6 +113,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoLook(float Yaw, float Pitch);
 
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoStartDash();
+	UFUNCTION()
+	virtual void DoEndDash();
+
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpStart();
@@ -84,6 +125,24 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+
+	/** Handles grapple pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleStart();
+
+	/** Handles jump pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleEnd();
+
+
+	/** Handles jump pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoShootBallStart();
+
+	/** Handles jump pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoShootBallEnd();
+
 
 public:
 
