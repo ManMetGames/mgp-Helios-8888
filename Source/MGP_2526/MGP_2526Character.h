@@ -126,10 +126,14 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	// Initial check to see if the player can grapple
+	UFUNCTION(BlueprintCallable, Category = "Input"	)
+	virtual void TryGrapple();
 
-	/** Handles grapple pressed inputs from either controls or UI interfaces */
+	/** Handles grappling towards a given location*/
 	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoGrappleStart();
+	virtual void DoGrappleStart(FVector AnchorPosition);
+
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category = "Input")

@@ -137,7 +137,7 @@ void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
 void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 {
 	// route the input
-	DoGrappleStart();
+	TryGrapple();
 }
 
 void AMGP_2526Character::EndGrapple(const FInputActionValue& Value)
@@ -236,8 +236,7 @@ void AMGP_2526Character::DoEndDash() {
 	
 }
 
-void AMGP_2526Character::DoGrappleStart()
-{
+void AMGP_2526Character::TryGrapple() {
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
 
 	FVector StartPos = GetFollowCamera()->GetComponentLocation();
@@ -247,17 +246,26 @@ void AMGP_2526Character::DoGrappleStart()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, TraceChannelProperty, Params);	
+	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, TraceChannelProperty, Params);
 
-	if (Hit.GetActor()){
-		
+	if (Hit.GetActor()) {
+
 		UE_LOG(LogTemp, Warning, TEXT("Grapple Hit: %s"), *Hit.GetActor()->GetName());
 		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 5.f);
-		
+
 	}
 	else {
 		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
 	}
+}
+
+void AMGP_2526Character::DoGrappleStart(FVector AnchorPosition)
+{
+	// Restrict the player's movement to a radius of the grapple range around the anchor point.
+
+	// Apply a force towards the anchor.
+
+
 
 }
 
