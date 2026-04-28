@@ -239,7 +239,26 @@ void AMGP_2526Character::DoEndDash() {
 void AMGP_2526Character::DoGrappleStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
-	
+
+	FVector StartPos = GetFollowCamera()->GetComponentLocation();
+	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * GrappleRange;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, TraceChannelProperty, Params);	
+
+	if (Hit.GetActor()){
+		
+		UE_LOG(LogTemp, Warning, TEXT("Grapple Hit: %s"), *Hit.GetActor()->GetName());
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 5.f);
+		
+	}
+	else {
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
+	}
+
 }
 
 void AMGP_2526Character::DoGrappleEnd()
