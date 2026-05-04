@@ -64,6 +64,8 @@ protected:
 	/** Dash Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bDashing = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	/** How far the dash should go */
