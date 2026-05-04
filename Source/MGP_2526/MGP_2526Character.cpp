@@ -86,6 +86,7 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Shooting
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartGrapple);
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Ongoing, this, &AMGP_2526Character::Grapple);
 
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndGrapple);
 
@@ -119,7 +120,8 @@ void AMGP_2526Character::Look(const FInputActionValue& Value)
 void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 {
 	// route the input
-	DoStartDash();
+	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+	DoStartDash(DashDistance);
 }
 
 void AMGP_2526Character::ShootBall(const FInputActionValue& Value)
@@ -137,7 +139,19 @@ void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
 void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 {
 	// route the input
-	TryGrapple();
+	FVector HitLocation = TryRayCast(GrappleRange);
+	if (HitLocation != FVector::ZeroVector) {
+		bGrappling = true;
+		CurrentGrapplePoint = HitLocation;
+	}
+}
+
+void AMGP_2526Character::Grapple(const FInputActionValue& Value)
+{
+	if (bGrappling) {
+
+		ApplyGrappleForce(CurrentGrapplePoint);
+	}
 }
 
 void AMGP_2526Character::EndGrapple(const FInputActionValue& Value)
@@ -160,6 +174,7 @@ void AMGP_2526Character::DoMove(float Right, float Forward)
 
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		SideDirection = Right;
 
 		// add movement 
 		AddMovementInput(ForwardDirection, Forward);
@@ -207,15 +222,17 @@ void AMGP_2526Character::DoShootBallEnd()
 	//
 }
 
-void AMGP_2526Character::DoStartDash(){
-	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-	//I'm thinking I turn this into a grapple retract. 
-	//It might also be cool if when the grapple hits an enemy, it pulls the enemy towards the player instead of the player towards the enemy.
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::SanitizeFloat(GetVelocity().Size()));
-	//Get player's facing direction. later on will be the vector from player to grapple point
-	FVector DashDirection = GetFollowCamera()->GetComponentRotation().Vector();
-	//Apply a force
-	LaunchCharacter(DashStrength * DashDirection, true, true);
+void AMGP_2526Character::DoStartDash(float dashDistance){
+	//I've changed my mind. I'm gonna do a slam.
+	// Ray cast towards the ground based on the player's camera direction. If it hits something we launch our player towards the ground in a straight line.
+	FVector HitLocation = TryRayCast(DashDistance);
+	if (HitLocation != FVector::ZeroVector) {
+		//Apply a force
+		FVector DashDirection = HitLocation - GetActorLocation();
+		LaunchCharacter(DashForce * DashDirection.GetSafeNormal(), true, true);
+		bDashing = true;
+	}
+	//CurrentGrapplePoint = FVector::ZeroVector;
 }
 
 void AMGP_2526Character::DoEndDash() {
@@ -223,25 +240,15 @@ void AMGP_2526Character::DoEndDash() {
 	
 	//Get the player's current position and velocity
 	FVector CurrentPos = GetActorLocation();
-	FVector CurrentVel = GetVelocity();
-	float currentSpeed = CurrentVel.Size();
-	CurrentVel.Normalize();
-	//Set their walk speed to the stored velocity
-	GetCharacterMovement()->MaxWalkSpeed = currentSpeed;
-	//Set y velocity to 0?
-	CurrentVel.Z = 0;
-	CurrentVel *= currentSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *CurrentVel.ToString());
-	GetCharacterMovement()->Velocity = CurrentVel;
+	GetCharacterMovement()->Velocity = FVector::ZeroVector;
 	
 }
 
-void AMGP_2526Character::TryGrapple() {
+FVector AMGP_2526Character::TryRayCast(float range) {
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
 
 	FVector StartPos = GetFollowCamera()->GetComponentLocation();
-	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * GrappleRange;
-
+	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * range;
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -250,20 +257,24 @@ void AMGP_2526Character::TryGrapple() {
 
 	if (Hit.GetActor()) {
 
-		UE_LOG(LogTemp, Warning, TEXT("Grapple Hit: %s"), *Hit.GetActor()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Ray Cast Hit: %s"), *Hit.GetActor()->GetName());
 		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 5.f);
-
+		return Hit.ImpactPoint;
 	}
 	else {
 		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
+		return FVector::ZeroVector;
 	}
 }
 
-void AMGP_2526Character::DoGrappleStart(FVector AnchorPosition)
+void AMGP_2526Character::ApplyGrappleForce(FVector AnchorPosition)
 {
 	// Restrict the player's movement to a radius of the grapple range around the anchor point.
-
+	FVector DirectionTowardsAnchor = AnchorPosition - GetActorLocation();
+	float GrappleLength = DirectionTowardsAnchor.Size();
+	DirectionTowardsAnchor.Normalize();
 	// Apply a force towards the anchor.
+	LaunchCharacter(DirectionTowardsAnchor * GrappleLength*0.1f, false, false);
 
 
 
@@ -271,5 +282,6 @@ void AMGP_2526Character::DoGrappleStart(FVector AnchorPosition)
 
 void AMGP_2526Character::DoGrappleEnd()
 {
+	bGrappling = false;	
 	UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
 }

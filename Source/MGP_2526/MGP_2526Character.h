@@ -51,6 +51,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float SideDirection;
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* LookAction;
@@ -62,15 +64,25 @@ protected:
 	/** Dash Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* DashAction;
-
+	bool bDashing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	/** How far the dash should go */
-	float DashStrength =  3000.f;
+	float DashDistance =  10000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashForce = 15000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
 
+
 	/** How far the dash should go */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float GrappleRange = 5000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bGrappling = false;
+
+	FVector CurrentGrapplePoint;
 
 	/** Shoot Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -99,6 +111,7 @@ protected:
 	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
 	void StartDash(const FInputActionValue& Value);
 	void StartGrapple(const FInputActionValue& Value);
+	void Grapple(const FInputActionValue& Value);
 	void EndGrapple(const FInputActionValue& Value);
 	void ShootBall(const FInputActionValue& Value);
 	void ShootBallEnd(const FInputActionValue& Value);
@@ -115,7 +128,7 @@ public:
 	virtual void DoLook(float Yaw, float Pitch);
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoStartDash();
+	virtual void DoStartDash(float dashStrength);
 	UFUNCTION()
 	virtual void DoEndDash();
 
@@ -128,11 +141,7 @@ public:
 	virtual void DoJumpEnd();
 	// Initial check to see if the player can grapple
 	UFUNCTION(BlueprintCallable, Category = "Input"	)
-	virtual void TryGrapple();
-
-	/** Handles grappling towards a given location*/
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoGrappleStart(FVector AnchorPosition);
+	virtual FVector TryRayCast(float range);
 
 
 	/** Handles jump pressed inputs from either controls or UI interfaces */
@@ -148,6 +157,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoShootBallEnd();
 
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void ApplyGrappleForce(FVector AnchorPosition);
 
 public:
 
