@@ -42,6 +42,8 @@ AMGP_2526Character::AMGP_2526Character()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+	GetCharacterMovement()->AirControlBoostVelocityThreshold = 2000.f;
+	GetCharacterMovement()->AirControlBoostMultiplier = 2.5f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -96,6 +98,18 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		UE_LOG(LogMGP_2526, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+void AMGP_2526Character::BeginPlay()
+{
+	// Call the base class  
+	Super::BeginPlay();
+	//Add Input Mapping Context
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMGP_2526Character::OnHit);
+	GrappleTimer = 0.f;
+	DashTimer = 0.f;
+	GrappleCooldown = 4.f;
+	DashCooldown = 5.f;
+}
+
 void AMGP_2526Character::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -107,6 +121,14 @@ void AMGP_2526Character::Tick(float DeltaSeconds)
 			FVector DashDirection = DashTarget - GetActorLocation();
 			LaunchCharacter(DashForce * DashDirection, true, true);
 		}
+	}
+	if (GrappleTimer > 0.f) {
+		GrappleTimer -= DeltaSeconds;
+		//UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer);
+	}
+	if (DashTimer > 0.f	) {
+		DashTimer -= DeltaSeconds;
+		//UE_LOG(LogTemp, Warning, TEXT("Dash Timer: %f"), DashTimer);
 	}
 }
 
@@ -144,11 +166,8 @@ void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 {
 	// route the input
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-	FVector HitLocation = TryRayCast(DashDistance);
-	if (HitLocation != FVector::ZeroVector && HitLocation.Z < GetActorLocation().Z) {
-		//Apply a force
-		bDashing = true;
-		DashTarget = HitLocation;
+	if (DashTimer <= 0.f) {
+		DoStartDash(DashDistance);
 	}
 }
 
@@ -167,10 +186,14 @@ void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
 void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 {
 	// route the input
+	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
 	FVector HitLocation = TryRayCast(GrappleRange);
-	if (HitLocation != FVector::ZeroVector) {
+	UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer);
+	if (HitLocation != FVector::ZeroVector && GrappleTimer<=0.f) {
 		bGrappling = true;
 		CurrentGrapplePoint = HitLocation;
+		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true);
+		GrappleTimer = GrappleCooldown;	
 	}
 }
 
@@ -179,6 +202,7 @@ void AMGP_2526Character::Grapple(const FInputActionValue& Value)
 	if (bGrappling) {
 
 		ApplyGrappleForce(CurrentGrapplePoint);
+		
 	}
 }
 
@@ -254,13 +278,14 @@ void AMGP_2526Character::DoStartDash(float dashDistance){
 	//I've changed my mind. I'm gonna do a slam.
 	// Ray cast towards the ground based on the player's camera direction. If it hits something we launch our player towards the ground in a straight line.
 	FVector HitLocation = TryRayCast(DashDistance);
-	if (HitLocation != FVector::ZeroVector && HitLocation.Z < GetActorLocation().Z) {
+	UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitLocation.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Player Location: %s"), *GetActorLocation().ToString());
+	if (HitLocation != FVector::ZeroVector && (GetActorLocation().Z - HitLocation.Z>999.f)) {
 		//Apply a force
 		bDashing = true;
-		FVector DashDirection = HitLocation - GetActorLocation();
-		LaunchCharacter(DashForce * DashDirection.GetSafeNormal(), true, true);
+		DashTarget = HitLocation;
+		DashTimer = DashCooldown;
 	}
-	//CurrentGrapplePoint = FVector::ZeroVector;
 }
 
 void AMGP_2526Character::DoEndDash() {
@@ -276,7 +301,6 @@ void AMGP_2526Character::DoEndDash() {
 }
 
 FVector AMGP_2526Character::TryRayCast(float range) {
-	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
 
 	FVector StartPos = GetFollowCamera()->GetComponentLocation();
 	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * range;
@@ -313,6 +337,7 @@ void AMGP_2526Character::ApplyGrappleForce(FVector AnchorPosition)
 
 void AMGP_2526Character::DoGrappleEnd()
 {
-	bGrappling = false;	
+	bGrappling = false;
 	UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
+	//GrappleTimer = GrappleCooldown;
 }

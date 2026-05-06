@@ -69,7 +69,7 @@ protected:
 	bool bDashing = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	/** How far the dash should go */
-	float DashDistance =  10000.f;
+	float DashDistance =  5000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float DashForce = 15.f;
@@ -77,17 +77,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector DashTarget = FVector::ZeroVector;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashCooldown = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashTimer = 5.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
 
 
 	/** How far the dash should go */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float GrappleRange = 5000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleRange = 3000.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bGrappling = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleCooldown = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleTimer = 4.f;
+
+	UPROPERTY()
 	FVector CurrentGrapplePoint;
 
 	/** Shoot Input Action */
@@ -114,6 +125,7 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
+	virtual void BeginPlay() override;	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	/** Called for looking input */
