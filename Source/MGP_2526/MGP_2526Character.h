@@ -70,8 +70,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	/** How far the dash should go */
 	float DashDistance =  10000.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float DashForce = 15000.f;
+	float DashForce = 15.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector DashTarget = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
@@ -98,6 +102,9 @@ public:
 	/** Constructor */
 	AMGP_2526Character();	
 
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 protected:
 
 	/** Initialize input action bindings */
@@ -107,6 +114,7 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);

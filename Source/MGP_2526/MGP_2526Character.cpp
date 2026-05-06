@@ -96,10 +96,33 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		UE_LOG(LogMGP_2526, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+void AMGP_2526Character::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (bDashing) {
+		if ((DashTarget - GetActorLocation()).Size() < 500.f) {
+			DoEndDash();
+		}
+		else {
+			FVector DashDirection = DashTarget - GetActorLocation();
+			LaunchCharacter(DashForce * DashDirection, true, true);
+		}
+	}
+}
+
 void AMGP_2526Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 }
+
+void AMGP_2526Character::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if ((OtherActor!= nullptr) && (OtherActor != this) && (OtherComp!=nullptr))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player hit: %s"), *OtherActor->GetName());
+	}
+}
+
 void AMGP_2526Character::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -121,7 +144,12 @@ void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 {
 	// route the input
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
-	DoStartDash(DashDistance);
+	FVector HitLocation = TryRayCast(DashDistance);
+	if (HitLocation != FVector::ZeroVector && HitLocation.Z < GetActorLocation().Z) {
+		//Apply a force
+		bDashing = true;
+		DashTarget = HitLocation;
+	}
 }
 
 void AMGP_2526Character::ShootBall(const FInputActionValue& Value)
@@ -226,21 +254,24 @@ void AMGP_2526Character::DoStartDash(float dashDistance){
 	//I've changed my mind. I'm gonna do a slam.
 	// Ray cast towards the ground based on the player's camera direction. If it hits something we launch our player towards the ground in a straight line.
 	FVector HitLocation = TryRayCast(DashDistance);
-	if (HitLocation != FVector::ZeroVector) {
+	if (HitLocation != FVector::ZeroVector && HitLocation.Z < GetActorLocation().Z) {
 		//Apply a force
+		bDashing = true;
 		FVector DashDirection = HitLocation - GetActorLocation();
 		LaunchCharacter(DashForce * DashDirection.GetSafeNormal(), true, true);
-		bDashing = true;
 	}
 	//CurrentGrapplePoint = FVector::ZeroVector;
 }
 
 void AMGP_2526Character::DoEndDash() {
 	// I want the end of dash to cancel out the player's vertical velocity and set their horizontal velocity to the speed they had at the start of the dash.
-	
+	bDashing = false;
+	GetCharacterMovement()->StopActiveMovement();
+	UE_LOG(LogTemp, Warning, TEXT("Player Ended Dash"));
+	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MovementMode);
 	//Get the player's current position and velocity
-	FVector CurrentPos = GetActorLocation();
-	GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	//FVector CurrentPos = GetActorLocation();
+	//GetCharacterMovement()->Velocity = FVector::ZeroVector;
 	
 }
 
@@ -258,11 +289,11 @@ FVector AMGP_2526Character::TryRayCast(float range) {
 	if (Hit.GetActor()) {
 
 		UE_LOG(LogTemp, Warning, TEXT("Ray Cast Hit: %s"), *Hit.GetActor()->GetName());
-		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 5.f);
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
 		return Hit.ImpactPoint;
 	}
 	else {
-		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::White, false, 5.f);
 		return FVector::ZeroVector;
 	}
 }
