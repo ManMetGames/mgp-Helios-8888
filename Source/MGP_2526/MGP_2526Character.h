@@ -94,6 +94,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float GrappleRange = 3000.f;
 
+	float InitialGrappleLength;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bGrappling = false;
 

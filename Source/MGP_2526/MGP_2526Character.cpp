@@ -195,8 +195,11 @@ void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 	if (HitLocation != FVector::ZeroVector && GrappleTimer<=0.f) {
 		bGrappling = true;
 		CurrentGrapplePoint = HitLocation;
-		GrappleCable->CableLength = (CurrentGrapplePoint - GetActorLocation()).Size();
+		InitialGrappleLength = (CurrentGrapplePoint - GetActorLocation()).Size();
+		GrappleCable->CableLength = InitialGrappleLength;
 		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true);
+
+		GrappleCable->SetVisibility(true);
 		GrappleTimer = GrappleCooldown;	
 	}
 }
@@ -206,12 +209,10 @@ void AMGP_2526Character::Grapple(const FInputActionValue& Value)
 	if (bGrappling) {
 
 		ApplyGrappleForce(CurrentGrapplePoint);
-		//Get Cable
-		GrappleCable->SetVisibility(true);
-		//Set Cable end point to grapple point
-		GrappleCable->EndLocation = CurrentGrapplePoint;
-		
-		if ((GetActorLocation() - CurrentGrapplePoint).Size() < 500.f) {
+		GrappleCable->EndLocation = GetActorTransform().InverseTransformPosition(CurrentGrapplePoint);
+		float distance = (GetActorLocation() - CurrentGrapplePoint).Size();
+		GrappleCable->CableLength = distance;
+		if (distance< 500.f || distance>InitialGrappleLength){
 			DoGrappleEnd();
 		}
 	}
@@ -291,7 +292,7 @@ void AMGP_2526Character::DoStartDash(float dashDistance){
 	FVector HitLocation = TryRayCast(DashDistance);
 	UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitLocation.ToString());
 	UE_LOG(LogTemp, Warning, TEXT("Player Location: %s"), *GetActorLocation().ToString());
-	if (HitLocation != FVector::ZeroVector && (GetActorLocation().Z - HitLocation.Z>999.f)) {
+	if (HitLocation != FVector::ZeroVector && (GetActorLocation().Z - HitLocation.Z>100.f)) {
 		//Apply a force
 		bDashing = true;
 		DashTarget = HitLocation;
