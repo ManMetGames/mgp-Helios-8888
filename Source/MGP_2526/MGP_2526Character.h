@@ -8,10 +8,10 @@
 #include "MyHealthComponent.h"
 #include "BallProj.h"
 #include "CableComponent.h"		
+#include "Kismet/GameplayStatics.h"
 #include "MGP_2526Character.generated.h"
 
 class UCableComponent;
-class UAudioComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -87,8 +87,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float DashTimer = 5.f;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	//TObjectPtr<UAudioComponent> DashAudioComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* DashSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;

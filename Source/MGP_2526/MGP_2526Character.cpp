@@ -12,6 +12,7 @@
 #include "InputActionValue.h"
 #include "MyHealthComponent.h"
 #include "CableComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "BallProj.h"
 
 #include "MGP_2526.h"
@@ -63,7 +64,7 @@ AMGP_2526Character::AMGP_2526Character()
 
 	// Surely I don't have to modify the build file again	
 	//DashAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
-	//DashAudioComponent->SetupAttachment(RootComponent);
+	//DashAudioComponent->SetupAttachment(RootComponent); //WHY WONT YOU WORK
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -309,7 +310,7 @@ void AMGP_2526Character::DoEndDash() {
 	UE_LOG(LogTemp, Warning, TEXT("Player Ended Dash"));
 	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MovementMode);
 	//Play the audio cue
-	//DashAudioComponent->Play();
+	UGameplayStatics::PlaySound2D(this, DashSound);
 	
 }
 
