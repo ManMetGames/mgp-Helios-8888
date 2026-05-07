@@ -7,8 +7,10 @@
 #include "Logging/LogMacros.h"
 #include "MyHealthComponent.h"
 #include "BallProj.h"
+#include "CableComponent.h"
 #include "MGP_2526Character.generated.h"
 
+class UCableComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -85,6 +87,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UCableComponent* GrappleCable;
 
 	/** How far the dash should go */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -98,7 +102,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float GrappleTimer = 4.f;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector CurrentGrapplePoint;
 
 	/** Shoot Input Action */

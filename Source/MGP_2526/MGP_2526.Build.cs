@@ -18,7 +18,8 @@ public class MGP_2526 : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"CableComponent",	//I have to add this here in order to access the header for cable component
+            "Slate"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -38,6 +39,7 @@ public class MGP_2526 : ModuleRules
 			"MGP_2526/Variant_SideScrolling/Gameplay",
 			"MGP_2526/Variant_SideScrolling/Interfaces",
 			"MGP_2526/Variant_SideScrolling/UI"
+
 		});
 
 		// Uncomment if you are using Slate UI

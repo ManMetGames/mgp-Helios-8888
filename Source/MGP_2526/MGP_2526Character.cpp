@@ -10,8 +10,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-
 #include "MyHealthComponent.h"
+#include "CableComponent.h"
 #include "BallProj.h"
 
 #include "MGP_2526.h"
@@ -57,7 +57,10 @@ AMGP_2526Character::AMGP_2526Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	
+	GrappleCable = CreateDefaultSubobject<UCableComponent>(TEXT("GrappleCable"));
+	GrappleCable->SetupAttachment(RootComponent);
+	GrappleCable->SetVisibility(false);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -192,6 +195,7 @@ void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 	if (HitLocation != FVector::ZeroVector && GrappleTimer<=0.f) {
 		bGrappling = true;
 		CurrentGrapplePoint = HitLocation;
+		GrappleCable->CableLength = (CurrentGrapplePoint - GetActorLocation()).Size();
 		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true);
 		GrappleTimer = GrappleCooldown;	
 	}
@@ -202,7 +206,14 @@ void AMGP_2526Character::Grapple(const FInputActionValue& Value)
 	if (bGrappling) {
 
 		ApplyGrappleForce(CurrentGrapplePoint);
+		//Get Cable
+		GrappleCable->SetVisibility(true);
+		//Set Cable end point to grapple point
+		GrappleCable->EndLocation = CurrentGrapplePoint;
 		
+		if ((GetActorLocation() - CurrentGrapplePoint).Size() < 500.f) {
+			DoGrappleEnd();
+		}
 	}
 }
 
@@ -337,7 +348,9 @@ void AMGP_2526Character::ApplyGrappleForce(FVector AnchorPosition)
 
 void AMGP_2526Character::DoGrappleEnd()
 {
-	bGrappling = false;
-	UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
-	//GrappleTimer = GrappleCooldown;
+	if (bGrappling) {
+		bGrappling = false;
+		UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
+		GrappleCable->SetVisibility(false);
+	}
 }
