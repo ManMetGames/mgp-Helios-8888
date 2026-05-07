@@ -61,6 +61,10 @@ AMGP_2526Character::AMGP_2526Character()
 	GrappleCable->SetupAttachment(RootComponent);
 	GrappleCable->SetVisibility(false);
 
+	// Surely I don't have to modify the build file again	
+	//DashAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
+	//DashAudioComponent->SetupAttachment(RootComponent);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -277,8 +281,6 @@ void AMGP_2526Character::DoShootBallStart()
 		Ball->SetActorLabel(TEXT("Ball"));	
 		UE_LOG(LogTemp, Warning, TEXT("Ball Spawned"));
 	}
-	//HealthComponent->UpdateHealth(-10.f);
-	//UE_LOG(LogTemp, Warning, TEXT("Player has %f health remaining"), HealthComponent->GetHealth());	
 }
 
 void AMGP_2526Character::DoShootBallEnd()
@@ -306,9 +308,8 @@ void AMGP_2526Character::DoEndDash() {
 	GetCharacterMovement()->StopActiveMovement();
 	UE_LOG(LogTemp, Warning, TEXT("Player Ended Dash"));
 	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MovementMode);
-	//Get the player's current position and velocity
-	//FVector CurrentPos = GetActorLocation();
-	//GetCharacterMovement()->Velocity = FVector::ZeroVector;
+	//Play the audio cue
+	//DashAudioComponent->Play();
 	
 }
 

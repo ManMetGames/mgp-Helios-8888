@@ -7,10 +7,11 @@
 #include "Logging/LogMacros.h"
 #include "MyHealthComponent.h"
 #include "BallProj.h"
-#include "CableComponent.h"
+#include "CableComponent.h"		
 #include "MGP_2526Character.generated.h"
 
 class UCableComponent;
+class UAudioComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -38,6 +39,8 @@ class AMGP_2526Character : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	//I think I need sometning for audio
 
 	UPROPERTY(EditAnywhere, Category = "Collision")
 	TEnumAsByte<ECollisionChannel> TraceChannelProperty = ECC_Pawn;
@@ -83,6 +86,9 @@ protected:
 	float DashCooldown = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float DashTimer = 5.f;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	//TObjectPtr<UAudioComponent> DashAudioComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
