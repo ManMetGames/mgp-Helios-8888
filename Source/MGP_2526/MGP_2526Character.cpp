@@ -300,6 +300,7 @@ void AMGP_2526Character::DoStartDash(float dashDistance){
 		bDashing = true;
 		DashTarget = HitLocation;
 		DashTimer = DashCooldown;
+		UGameplayStatics::PlaySound2D(this, DashStartSound);
 	}
 }
 
@@ -310,7 +311,7 @@ void AMGP_2526Character::DoEndDash() {
 	UE_LOG(LogTemp, Warning, TEXT("Player Ended Dash"));
 	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MovementMode);
 	//Play the audio cue
-	UGameplayStatics::PlaySound2D(this, DashSound);
+	UGameplayStatics::PlaySound2D(this, DashImpactSound);
 	
 }
 

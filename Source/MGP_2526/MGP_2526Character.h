@@ -88,7 +88,9 @@ protected:
 	float DashTimer = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
-	USoundBase* DashSound;
+	USoundBase* DashImpactSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* DashStartSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* GrappleAction;
