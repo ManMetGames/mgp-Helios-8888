@@ -98,6 +98,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UCableComponent* GrappleCable;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* GrappleCastSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* GrappleImpactSound;
+
 	/** How far the dash should go */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float GrappleRange = 3000.f;

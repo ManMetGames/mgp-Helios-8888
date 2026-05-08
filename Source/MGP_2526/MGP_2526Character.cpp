@@ -195,6 +195,7 @@ void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 {
 	// route the input
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
+	UGameplayStatics::PlaySound2D(this, GrappleCastSound);
 	FVector HitLocation = TryRayCast(GrappleRange);
 	UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer);
 	if (HitLocation != FVector::ZeroVector && GrappleTimer<=0.f) {
@@ -203,7 +204,7 @@ void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 		InitialGrappleLength = (CurrentGrapplePoint - GetActorLocation()).Size();
 		GrappleCable->CableLength = InitialGrappleLength;
 		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true);
-
+		UGameplayStatics::PlaySound2D(this, GrappleImpactSound);
 		GrappleCable->SetVisibility(true);
 		GrappleTimer = GrappleCooldown;	
 	}
