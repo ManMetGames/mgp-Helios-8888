@@ -5,12 +5,19 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "MyHealthComponent.h"
+#include "BallProj.h"
+#include "CableComponent.h"		
+#include "Kismet/GameplayStatics.h"
 #include "MGP_2526Character.generated.h"
 
+class UCableComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class UMyHealthComponent;
 struct FInputActionValue;
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -23,6 +30,8 @@ class AMGP_2526Character : public ACharacter
 {
 	GENERATED_BODY()
 
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	//UMyHealthComponent* HealthComponent;
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
@@ -30,6 +39,12 @@ class AMGP_2526Character : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	//I think I need sometning for audio
+
+	UPROPERTY(EditAnywhere, Category = "Collision")
+	TEnumAsByte<ECollisionChannel> TraceChannelProperty = ECC_Pawn;
+	
 	
 protected:
 
@@ -41,6 +56,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float SideDirection;
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* LookAction;
@@ -49,10 +66,71 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	/** Dash Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bDashing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	/** How far the dash should go */
+	float DashDistance =  5000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashForce = 15.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector DashTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashCooldown = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DashTimer = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* DashImpactSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* DashStartSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* GrappleAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UCableComponent* GrappleCable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* GrappleCastSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	USoundBase* GrappleImpactSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CameraShake")
+	TSubclassOf<UCameraShakeBase> GrappleCameraShake;
+
+	/** How far the dash should go */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleRange = 3000.f;
+
+	float InitialGrappleLength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bGrappling = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleCooldown = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GrappleTimer = 4.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector CurrentGrapplePoint;
+
 public:
 
 	/** Constructor */
 	AMGP_2526Character();	
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
 
@@ -63,9 +141,17 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
+	// Start, Update and End
+	virtual void BeginPlay() override;	
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	/** Inputs*/
 	void Look(const FInputActionValue& Value);
+	void StartDash(const FInputActionValue& Value);
+	void StartGrapple(const FInputActionValue& Value);
+	void HoldGrapple(const FInputActionValue& Value);
+	void EndGrapple(const FInputActionValue& Value);
+
 
 public:
 
@@ -77,6 +163,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoLook(float Yaw, float Pitch);
 
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoStartDash(float dashStrength);
+	UFUNCTION()
+	virtual void DoEndDash();
+
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpStart();
@@ -84,6 +175,15 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	// Initial check to see if the player can grapple
+	UFUNCTION(BlueprintCallable, Category = "Input"	)
+	virtual FVector TryRayCast(float range);
+
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleMovement(FVector AnchorPosition);
+	/** Handles jump pressed inputs from either controls or UI interfaces */
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleEnd();
 
 public:
 
