@@ -2,6 +2,9 @@
 # MGP_2526
  The assessment repo for 2526
 
+Video
+MMUTube Link: https://mmutube.mmu.ac.uk/media/t/1_h3obr8ob
+
 Mechanics Implemented
 - Dash (Primary mechanic)
 - Grappling Hook (Secondary Mechanic)
