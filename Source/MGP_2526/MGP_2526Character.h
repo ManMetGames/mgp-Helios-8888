@@ -149,7 +149,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void StartDash(const FInputActionValue& Value);
 	void StartGrapple(const FInputActionValue& Value);
-	void UseGrapple(const FInputActionValue& Value);
+	void HoldGrapple(const FInputActionValue& Value);
 	void EndGrapple(const FInputActionValue& Value);
 
 

@@ -86,7 +86,7 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 		// Grappling
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartGrapple);
-		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Ongoing, this, &AMGP_2526Character::UseGrapple);
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Ongoing, this, &AMGP_2526Character::HoldGrapple);
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndGrapple);
 
 	}
@@ -224,7 +224,7 @@ void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 	}
 }
 
-void AMGP_2526Character::UseGrapple(const FInputActionValue& Value)
+void AMGP_2526Character::HoldGrapple(const FInputActionValue& Value)
 {
 	if (bGrappling) {
 		// Applies a force as long as the grapple is held
