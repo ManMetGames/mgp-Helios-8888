@@ -313,7 +313,7 @@ void AMGP_2526Character::DoEndDash() {
 	UE_LOG(LogTemp, Warning, TEXT("%d"), GetCharacterMovement()->MovementMode);
 	//Play the audio cue
 	UGameplayStatics::PlaySound2D(this, DashImpactSound);
-	
+	UGameplayStatics::PlayWorldCameraShake(this, GrappleCameraShake, GetActorLocation(), 0.f,1000.f);
 }
 
 FVector AMGP_2526Character::TryRayCast(float range) {

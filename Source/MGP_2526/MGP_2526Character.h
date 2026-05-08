@@ -104,6 +104,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
 	USoundBase* GrappleImpactSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CameraShake")
+	TSubclassOf<UCameraShakeBase> GrappleCameraShake;
+
 	/** How far the dash should go */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float GrappleRange = 3000.f;
