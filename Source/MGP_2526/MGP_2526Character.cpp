@@ -58,16 +58,11 @@ AMGP_2526Character::AMGP_2526Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	//Create a cable for the grapple
 	GrappleCable = CreateDefaultSubobject<UCableComponent>(TEXT("GrappleCable"));
 	GrappleCable->SetupAttachment(RootComponent);
 	GrappleCable->SetVisibility(false);
 
-	// Surely I don't have to modify the build file again	
-	//DashAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
-	//DashAudioComponent->SetupAttachment(RootComponent); //WHY WONT YOU WORK
-
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
 void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -89,15 +84,9 @@ void AMGP_2526Character::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Dashing
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartDash);
 
-		// Shooting
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &AMGP_2526Character::ShootBall);
-
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMGP_2526Character::ShootBallEnd);
-
-		// Shooting
+		// Grappling
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Started, this, &AMGP_2526Character::StartGrapple);
-		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Ongoing, this, &AMGP_2526Character::Grapple);
-
+		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Ongoing, this, &AMGP_2526Character::UseGrapple);
 		EnhancedInputComponent->BindAction(GrappleAction, ETriggerEvent::Completed, this, &AMGP_2526Character::EndGrapple);
 
 	}
@@ -112,9 +101,13 @@ void AMGP_2526Character::BeginPlay()
 	Super::BeginPlay();
 	//Add Input Mapping Context
 	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &AMGP_2526Character::OnHit);
+
+	//Intitialise the grapple cooldown timer
 	GrappleTimer = 0.f;
-	DashTimer = 0.f;
 	GrappleCooldown = 4.f;
+
+	//Initialise the dash cooldown timer
+	DashTimer = 0.f;
 	DashCooldown = 5.f;
 }
 
@@ -130,26 +123,55 @@ void AMGP_2526Character::Tick(float DeltaSeconds)
 			LaunchCharacter(DashForce * DashDirection, true, true);
 		}
 	}
-	if (GrappleTimer > 0.f) {
+
+	//Simple countdown timer. Only updates when it has to 
+	if (GrappleTimer > 0.f) 
+	{
 		GrappleTimer -= DeltaSeconds;
-		//UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer);
 	}
-	if (DashTimer > 0.f	) {
+
+	//Simple countdown timer. Only updates when it has to
+	if (DashTimer > 0.f	) 
+	{
 		DashTimer -= DeltaSeconds;
-		//UE_LOG(LogTemp, Warning, TEXT("Dash Timer: %f"), DashTimer);
 	}
 }
 
 void AMGP_2526Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	//In case I ever need anything
+}
+
+FVector AMGP_2526Character::TryRayCast(float range) {
+	//Turned ray casting into a function since I used it somewhat often
+	FVector StartPos = GetFollowCamera()->GetComponentLocation(); //I was always ray casting from the player
+	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * range; // in a straight line
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); //Make sure the ray cast doesn't hit the player itself
+
+	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, TraceChannelProperty, Params);
+
+	if (Hit.GetActor()) {
+		//If ray cast hits anything, we return the location it hit
+		UE_LOG(LogTemp, Warning, TEXT("Ray Cast Hit: %s"), *Hit.GetActor()->GetName());
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
+		return Hit.ImpactPoint;
+	}
+	else {
+		//Otherwise return 0
+		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::White, false, 5.f);
+		return FVector::ZeroVector;
+	}
 }
 
 void AMGP_2526Character::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if ((OtherActor!= nullptr) && (OtherActor != this) && (OtherComp!=nullptr))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player hit: %s"), *OtherActor->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Player hit: %s"), *OtherActor->GetName()); //I never really needed this
 	}
 }
 
@@ -174,51 +196,48 @@ void AMGP_2526Character::StartDash(const FInputActionValue& Value)
 {
 	// route the input
 	UE_LOG(LogTemp, Warning, TEXT("Dash Pressed"));
+	
 	if (DashTimer <= 0.f) {
 		DoStartDash(DashDistance);
 	}
 }
 
-void AMGP_2526Character::ShootBall(const FInputActionValue& Value)
-{
-	// route the input
-	DoShootBallStart();
-}
-
-void AMGP_2526Character::ShootBallEnd(const FInputActionValue& Value)
-{
-	// route the input
-	DoShootBallEnd();
-}
 
 void AMGP_2526Character::StartGrapple(const FInputActionValue& Value)
 {
 	// route the input
 	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Grapple"));
-	UGameplayStatics::PlaySound2D(this, GrappleCastSound);
+	UGameplayStatics::PlaySound2D(this, GrappleCastSound); //Plays a sound for trying to use the grapple, even if it's on cooldown or misses
 	FVector HitLocation = TryRayCast(GrappleRange);
-	UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer);
+	UE_LOG(LogTemp, Warning, TEXT("Grapple Timer: %f"), GrappleTimer); //I never added any UI
 	if (HitLocation != FVector::ZeroVector && GrappleTimer<=0.f) {
+		//Start grappling
 		bGrappling = true;
+		GrappleTimer = GrappleCooldown;	//Start the cooldown
 		CurrentGrapplePoint = HitLocation;
-		InitialGrappleLength = (CurrentGrapplePoint - GetActorLocation()).Size();
-		GrappleCable->CableLength = InitialGrappleLength;
-		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true);
+		InitialGrappleLength = (CurrentGrapplePoint - GetActorLocation()).Size(); //Store the initial distance so that we can break the grapple later
+		LaunchCharacter((CurrentGrapplePoint - GetActorLocation()).GetSafeNormal() * 1000.f, true, true); //Apply an initial force to counteract some downards velocity
 		UGameplayStatics::PlaySound2D(this, GrappleImpactSound);
+		//Cable changes
+		GrappleCable->CableLength = InitialGrappleLength;
 		GrappleCable->SetVisibility(true);
-		GrappleTimer = GrappleCooldown;	
 	}
 }
 
-void AMGP_2526Character::Grapple(const FInputActionValue& Value)
+void AMGP_2526Character::UseGrapple(const FInputActionValue& Value)
 {
 	if (bGrappling) {
+		// Applies a force as long as the grapple is held
+		DoGrappleMovement(CurrentGrapplePoint);
 
-		ApplyGrappleForce(CurrentGrapplePoint);
-		GrappleCable->EndLocation = GetActorTransform().InverseTransformPosition(CurrentGrapplePoint);
+		//Updates the cable's end location  
 		float distance = (GetActorLocation() - CurrentGrapplePoint).Size();
+		GrappleCable->EndLocation = GetActorTransform().InverseTransformPosition(CurrentGrapplePoint); //I think something's not quite right about this
 		GrappleCable->CableLength = distance;
-		if (distance< 500.f || distance>InitialGrappleLength){
+
+		//Break the grapple if too close or too far
+		if (distance< 500.f || distance>InitialGrappleLength) 
+		{
 			DoGrappleEnd();
 		}
 	}
@@ -274,31 +293,13 @@ void AMGP_2526Character::DoJumpEnd()
 	StopJumping();
 }
 
-void AMGP_2526Character::DoShootBallStart()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Player Pressed Shoot"));
-	FVector SpawnLocation = GetActorForwardVector() * 100 + GetActorLocation();
-	ABallProj* Ball = GetWorld()->SpawnActor<ABallProj>(BP_ProjectileClass, SpawnLocation, GetFollowCamera()->GetComponentRotation());
-	if (Ball) {
-		Ball->SetActorLabel(TEXT("Ball"));	
-		UE_LOG(LogTemp, Warning, TEXT("Ball Spawned"));
-	}
-}
-
-void AMGP_2526Character::DoShootBallEnd()
-{
-	//
-}
 
 void AMGP_2526Character::DoStartDash(float dashDistance){
-	//I've changed my mind. I'm gonna do a slam.
-	// Ray cast towards the ground based on the player's camera direction. If it hits something we launch our player towards the ground in a straight line.
+	// Ray cast towards the ground based on the player's camera direction. 
 	FVector HitLocation = TryRayCast(DashDistance);
-	UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitLocation.ToString());
-	UE_LOG(LogTemp, Warning, TEXT("Player Location: %s"), *GetActorLocation().ToString());
 	if (HitLocation != FVector::ZeroVector && (GetActorLocation().Z - HitLocation.Z>100.f)) {
 		//Apply a force
-		bDashing = true;
+		bDashing = true; 
 		DashTarget = HitLocation;
 		DashTimer = DashCooldown;
 		UGameplayStatics::PlaySound2D(this, DashStartSound);
@@ -316,44 +317,23 @@ void AMGP_2526Character::DoEndDash() {
 	UGameplayStatics::PlayWorldCameraShake(this, GrappleCameraShake, GetActorLocation(), 0.f,1000.f);
 }
 
-FVector AMGP_2526Character::TryRayCast(float range) {
 
-	FVector StartPos = GetFollowCamera()->GetComponentLocation();
-	FVector EndPos = StartPos + GetFollowCamera()->GetForwardVector() * range;
-	FHitResult Hit;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
 
-	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, TraceChannelProperty, Params);
-
-	if (Hit.GetActor()) {
-
-		UE_LOG(LogTemp, Warning, TEXT("Ray Cast Hit: %s"), *Hit.GetActor()->GetName());
-		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Yellow, false, 5.f);
-		return Hit.ImpactPoint;
-	}
-	else {
-		DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::White, false, 5.f);
-		return FVector::ZeroVector;
-	}
-}
-
-void AMGP_2526Character::ApplyGrappleForce(FVector AnchorPosition)
+void AMGP_2526Character::DoGrappleMovement(FVector AnchorPosition)
 {
 	// Restrict the player's movement to a radius of the grapple range around the anchor point.
 	FVector DirectionTowardsAnchor = AnchorPosition - GetActorLocation();
 	float GrappleLength = DirectionTowardsAnchor.Size();
 	DirectionTowardsAnchor.Normalize();
-	// Apply a force towards the anchor.
-	LaunchCharacter(DirectionTowardsAnchor * GrappleLength*0.1f, false, false);
-
-
+	// Apply a force towards the anchor point.
+	LaunchCharacter(DirectionTowardsAnchor * GrappleLength*0.1f, false, false); //Force scales with distance just like tension
 
 }
 
 void AMGP_2526Character::DoGrappleEnd()
 {
-	if (bGrappling) {
+	if (bGrappling) // This condition might be wrong
+	{
 		bGrappling = false;
 		UE_LOG(LogTemp, Warning, TEXT("Player Released Grapple"));
 		GrappleCable->SetVisibility(false);

@@ -124,13 +124,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector CurrentGrapplePoint;
 
-	/** Shoot Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ShootAction;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABallProj> BP_ProjectileClass;
-
 public:
 
 	/** Constructor */
@@ -148,18 +141,16 @@ protected:
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
+	// Start, Update and End
 	virtual void BeginPlay() override;	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	/** Called for looking input */
+	/** Inputs*/
 	void Look(const FInputActionValue& Value);
-	/** Connah Addition 2 methods to ensure we handle sprint enable and disable **/
 	void StartDash(const FInputActionValue& Value);
 	void StartGrapple(const FInputActionValue& Value);
-	void Grapple(const FInputActionValue& Value);
+	void UseGrapple(const FInputActionValue& Value);
 	void EndGrapple(const FInputActionValue& Value);
-	void ShootBall(const FInputActionValue& Value);
-	void ShootBallEnd(const FInputActionValue& Value);
 
 
 public:
@@ -188,22 +179,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Input"	)
 	virtual FVector TryRayCast(float range);
 
-
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	virtual void DoGrappleMovement(FVector AnchorPosition);
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	virtual void DoGrappleEnd();
-
-
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoShootBallStart();
-
-	/** Handles jump pressed inputs from either controls or UI interfaces */
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void DoShootBallEnd();
-
-	UFUNCTION(BlueprintCallable, Category = "Input")
-	virtual void ApplyGrappleForce(FVector AnchorPosition);
 
 public:
 
